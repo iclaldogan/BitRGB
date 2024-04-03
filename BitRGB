@@ -1,0 +1,93 @@
+#include <iostream>
+#include <vector>
+#include <ctime>
+
+using namespace std;
+
+class RGB {
+public:
+    RGB(int r, int g, int b) : r(r), g(g), b(b) {}
+    void setR(int r) { this->r = r; }
+    void setG(int g) { this->g = g; }
+    void setB(int b) { this->b = b; }
+    int getR() const { return r; }
+    int getG() const { return g; }
+    int getB() const { return b; }
+
+private:
+    int r, g, b;
+};
+
+class Location {
+public:
+    Location(int x, int y) : x(x), y(y) {}
+    void setX(int x) { this->x = x; }
+    void setY(int y) { this->y = y; }
+    int getX() const { return x; }
+    int getY() const { return y; }
+
+private:
+    int x, y;
+};
+
+class Pixel {
+public:
+    Pixel(const Location& loc, const RGB& color) : loc(loc), color(color) {}
+    void setLocation(const Location& loc) { this->loc = loc; }
+    void setRGB(const RGB& color) { this->color = color; }
+    Location getLocation() const { return loc; }
+    RGB getColor() const { return color; }
+
+private:
+    Location loc;
+    RGB color;
+};
+
+class Screen {
+public:
+    Screen(int width, int height) : width(width), height(height) {
+        pixels.resize(width * height, Pixel(Location(0, 0), RGB(0, 0, 0)));
+    }
+
+    void setPixel(const Location& loc, const RGB& color) {
+        int index = (loc.getY() - 1) * width + (loc.getX() - 1); // Koordinatları sıfırdan başlattık
+        pixels[index].setLocation(loc);
+        pixels[index].setRGB(color);
+    }
+
+    void display() const {
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                int index = y * width + x;
+                const Pixel& pixel = pixels[index];
+                cout << "\033[48;2;" << pixel.getColor().getR() << ";" << pixel.getColor().getG() << ";" << pixel.getColor().getB() << "m  ";
+                cout << "\033[0m"; // Reset color after printing each pixel
+            }
+            cout << endl;
+        }
+    }
+
+private:
+    int width, height;
+    vector<Pixel> pixels;
+};
+
+int main() {
+    srand(time(NULL));
+    int screenWidth = 10;
+    int screenHeight = 10;
+
+    Screen screen(screenWidth, screenHeight);
+    for (int i = 1; i <= 10; i++) {
+        for (int j = 1; j <= 10; j++) {
+            int r = rand() % 255;
+            int g = rand() % 255;
+            int b = rand() % 255;
+
+            screen.setPixel(Location(i, j), RGB(r, g, b));
+        }
+    }
+
+    screen.display();
+    return 0;
+}
